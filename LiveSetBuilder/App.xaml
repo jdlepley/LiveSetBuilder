@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application
+    x:Class="LiveSetBuilder.App.App"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Bg">#121212</Color>
+            <Color x:Key="Fg">#ECECEC</Color>
+            <Style TargetType="ContentPage">
+                <Setter Property="BackgroundColor" Value="{StaticResource Bg}" />
+            </Style>
+            <Style TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource Fg}" />
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="TextColor" Value="{StaticResource Fg}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

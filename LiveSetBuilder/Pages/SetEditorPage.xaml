@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LiveSetBuilder.App.Pages.SetEditorPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Set Editor">
+
+	<Grid RowDefinitions="Auto,*" ColumnDefinitions="280,* ,320" Padding="8">
+		<!-- Top bar -->
+		<HorizontalStackLayout Grid.ColumnSpan="3" Spacing="8">
+			<Label Text="{Binding Show.Title}" FontSize="20" />
+			<Button Text="Runner" Clicked="OnRunner" HorizontalOptions="EndAndExpand"/>
+		</HorizontalStackLayout>
+
+		<!-- Left: Setlist -->
+		<VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="8">
+			<HorizontalStackLayout Spacing="8">
+				<Button Text="Add Song" Clicked="OnAddSong"/>
+				<Button Text="Import Master" Clicked="OnImportMaster"/>
+			</HorizontalStackLayout>
+
+			<CollectionView ItemsSource="{Binding Setlist}" x:Name="SetList"
+							SelectionMode="Single" SelectionChanged="OnSongSelected">
+				<CollectionView.ItemTemplate>
+					<DataTemplate>
+						<Frame Padding="8" Margin="0,4" BorderColor="#333" CornerRadius="10">
+							<VerticalStackLayout>
+								<Label Text="{Binding Title}" FontSize="16"/>
+								<Label Text="{Binding Bpm, StringFormat='BPM {0}'}" Opacity="0.8"/>
+							</VerticalStackLayout>
+						</Frame>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+		</VerticalStackLayout>
+
+		<!-- Center: Timeline placeholder + controls -->
+		<VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8">
+			<HorizontalStackLayout Spacing="8">
+				<Button Text="Detect BPM" Clicked="OnDetectBpm"/>
+				<Button Text="Play" Clicked="OnPlay"/>
+				<Button Text="Stop" Clicked="OnStop"/>
+			</HorizontalStackLayout>
+
+			<Grid BackgroundColor="#1E1E1E" HeightRequest="300">
+				<Label Text="Timeline Canvas (Skia) – coming next"
+					   HorizontalOptions="Center" VerticalOptions="Center" />
+			</Grid>
+		</VerticalStackLayout>
+
+		<!-- Right: Inspector placeholder -->
+		<ScrollView Grid.Row="1" Grid.Column="2" Padding="8">
+			<VerticalStackLayout Spacing="8">
+				<Label Text="Inspector" FontSize="18"/>
+				<Label Text="Click kit, count-in, panning… (stub)"/>
+			</VerticalStackLayout>
+		</ScrollView>
+	</Grid>
+
+</ContentPage>

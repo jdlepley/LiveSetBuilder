@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LiveSetBuilder.App.Pages.ShowsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Shows">
+    <VerticalStackLayout Padding="16" Spacing="12">
+        <HorizontalStackLayout Spacing="8">
+            <Button Text="New Show" Command="{Binding NewShowAsyncCommand}" />
+            <Button Text="Load Demo" Command="{Binding EnsureDemoAsyncCommand}" />
+        </HorizontalStackLayout>
+
+        <CollectionView ItemsSource="{Binding Items}" SelectionMode="Single" x:Name="ShowsList">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Padding="12" BorderColor="#333" CornerRadius="10" Margin="0,6">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Title}" FontSize="18" />
+                            <Label Text="{Binding UpdatedAt, StringFormat='Updated {0:G}'}" FontSize="12" Opacity="0.8"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Text="Open Set Editor" Clicked="OnOpenEditor" />
+    </VerticalStackLayout>
+</ContentPage>
