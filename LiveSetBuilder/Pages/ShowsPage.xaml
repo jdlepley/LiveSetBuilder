@@ -3,26 +3,71 @@
     x:Class="LiveSetBuilder.App.Pages.ShowsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Shows">
-    <VerticalStackLayout Padding="16" Spacing="12">
+    xmlns:core="clr-namespace:LiveSetBuilder.Core.Models;assembly=LiveSetBuilder.Core"
+    Title="Shows"
+    BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#111111}">
+
+
+    <Grid RowDefinitions="Auto,*" Padding="12">
+
+        <!-- Top bar -->
         <HorizontalStackLayout Spacing="8">
-            <Button Text="New Show" Command="{Binding NewShowAsyncCommand}" />
-            <Button Text="Load Demo" Command="{Binding EnsureDemoAsyncCommand}" />
+            <Button Text="New Show" Clicked="OnNewShow" />
         </HorizontalStackLayout>
 
-        <CollectionView ItemsSource="{Binding Items}" SelectionMode="Single" x:Name="ShowsList">
+        <!-- Shows list -->
+        <CollectionView Grid.Row="1"
+                        x:Name="ShowList"
+                        ItemsSource="{Binding Shows}"
+                        SelectionMode="Single"
+                        SelectionChanged="OnSelectionChanged">
+
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Padding="12" BorderColor="#333" CornerRadius="10" Margin="0,6">
-                        <VerticalStackLayout>
-                            <Label Text="{Binding Title}" FontSize="18" />
-                            <Label Text="{Binding UpdatedAt, StringFormat='Updated {0:G}'}" FontSize="12" Opacity="0.8"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                <DataTemplate x:DataType="core:Show" xmlns:core="clr-namespace:LiveSetBuilder.Core.Models;assembly=LiveSetBuilder.Core">
+                    <!-- Use Border so Stroke/Thickness are valid.
+                         VisualStateManager must appear BEFORE content inside Border. -->
+                    <Border x:Name="ItemRoot"
+                            Stroke="#333333"
+                            StrokeThickness="1"
+                            BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#1A1A1A}"
+                            Padding="10"
+                            Margin="0,6">
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter TargetName="ItemRoot" Property="Stroke" Value="#333333" />
+                                        <Setter TargetName="ItemRoot" Property="StrokeThickness" Value="1" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Selected">
+                                    <VisualState.Setters>
+                                        <Setter TargetName="ItemRoot" Property="Stroke" Value="#4E9BFF" />
+                                        <Setter TargetName="ItemRoot" Property="StrokeThickness" Value="2" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <!-- Row content -->
+                        <Grid ColumnDefinitions="*,Auto" >
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Title}" FontSize="16" />
+                                <Label Text="{Binding UpdatedAt, StringFormat='Updated {0:G}'}"
+                                       FontSize="12" Opacity="0.7"/>
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="1" Text="Edit" Clicked="OnEditShow" Margin="8,0,0,0"/>
+                        </Grid>
+
+                        <!-- Double-click anywhere in the row to open -->
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer NumberOfTapsRequired="2" Tapped="OnOpenSetEditorTapped"/>
+                        </Border.GestureRecognizers>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-
-        <Button Text="Open Set Editor" Clicked="OnOpenEditor" />
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

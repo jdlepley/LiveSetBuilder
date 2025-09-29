@@ -5,6 +5,7 @@ using LiveSetBuilder.App.ViewModels;
 using LiveSetBuilder.Core.Services;
 using LiveSetBuilder.Core.Storage;
 using LiveSetBuilder.Core.Util;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 #if WINDOWS
 using LiveSetBuilder.Platform.Audio;
@@ -21,6 +22,10 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
+
+        builder
+            .UseMauiApp<App>()
+            .UseSkiaSharp();
 
         // Core services & DB
         builder.Services.AddSingleton<IAppDatabase>(sp =>

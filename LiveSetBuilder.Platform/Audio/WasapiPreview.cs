@@ -1,5 +1,5 @@
 ﻿// LiveSetBuilder.Platform/Audio/WasapiPreview.cs (WINDOWS ONLY stub)
-#if WINDOWS
+
 using NAudio.Wave;
 
 namespace LiveSetBuilder.Platform.Audio;
@@ -41,4 +41,3 @@ public sealed class WasapiPreview : IAudioPreview
         return ValueTask.CompletedTask;
     }
 }
-#endif

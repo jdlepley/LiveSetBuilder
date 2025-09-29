@@ -24,12 +24,13 @@ public sealed class PresetService
         _assetCopier = assetCopier;
     }
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
         // Example: load JSONs from assets after copying (implement your own loader)
         // var clickJsonPath = await _assetCopier("Presets/click_presets.json");
         // var countJsonPath = await _assetCopier("Presets/count_presets.json");
         // Deserialize and resolve file paths via _assetCopier for each referenced WAV.
+        return Task.CompletedTask;
     }
 
     public IEnumerable<ClickPreset> GetClickPresets() => _clicks.Values;
