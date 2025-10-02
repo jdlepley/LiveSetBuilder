@@ -55,8 +55,8 @@ namespace LiveSetBuilder.App.Pages
         public ObservableCollection<BankItem> SoundBank { get; } = new();
 
         // Timeline config
-        private const double BarPx = 28;         // pixels per bar
-        private const int Subdivisions = 4;   // ticks per bar
+        private double _barPx = 28;              // pixels per bar (zoomable)
+        private const int Subdivisions = 4;      // ticks per bar
         private const double LaneHeight = 66;    // px
         private int _laneCount = 0;              // 0 lanes until something is dropped
         private double TimelineWidthBars = 64;   // logical width (bars)
@@ -88,6 +88,10 @@ namespace LiveSetBuilder.App.Pages
 
             SizeChanged += (_, __) => RedrawRulerAndSurface();
             BuildDefaultSoundBank();
+
+            // Initialize zoom UI
+            ZoomSlider.Value = _barPx;
+            ZoomLabel.Text = $"{_barPx:0} px/bar";
         }
 
         private void BuildDefaultSoundBank()
@@ -117,7 +121,6 @@ namespace LiveSetBuilder.App.Pages
             });
         }
 
-
         protected override async void OnAppearing()
         {
             base.OnAppearing();
@@ -127,6 +130,17 @@ namespace LiveSetBuilder.App.Pages
                 SongListView.SelectedItem = Vm.Setlist.FirstOrDefault();
             }
             catch { }
+        }
+
+        // ============================================================
+        // Layout: Zoom
+        // ============================================================
+
+        private void OnZoomChanged(object? sender, ValueChangedEventArgs e)
+        {
+            _barPx = Math.Max(8, e.NewValue);
+            ZoomLabel.Text = $"{_barPx:0} px/bar";
+            RedrawRulerAndSurface();
         }
 
         // ============================================================
@@ -143,7 +157,7 @@ namespace LiveSetBuilder.App.Pages
         private void DrawRuler()
         {
             RulerGrid.Children.Clear();
-            var width = TimelineWidthBars * BarPx;
+            var width = TimelineWidthBars * _barPx;
             RulerGrid.WidthRequest = width;
 
             var barStack = new Grid
@@ -161,7 +175,7 @@ namespace LiveSetBuilder.App.Pages
 
             for (int b = 0; b < TimelineWidthBars; b++)
             {
-                barStack.ColumnDefinitions.Add(new ColumnDefinition { Width = BarPx });
+                barStack.ColumnDefinitions.Add(new ColumnDefinition { Width = _barPx });
 
                 // Bar number
                 var lbl = new Label
@@ -211,7 +225,6 @@ namespace LiveSetBuilder.App.Pages
                 var label = new Label
                 {
                     Text = $"Lane {i + 1}",
-                    TextColor = Colors.White,
                     VerticalTextAlignment = TextAlignment.Center,
                     HeightRequest = LaneHeight - 8,
                     Margin = new Thickness(0, 4, 0, 4)
@@ -223,7 +236,7 @@ namespace LiveSetBuilder.App.Pages
             SurfaceGrid.Children.Clear();
             SurfaceGrid.RowDefinitions.Clear();
 
-            var surfaceWidth = TimelineWidthBars * BarPx;
+            var surfaceWidth = TimelineWidthBars * _barPx;
             var surfaceHeight = Math.Max(1, _laneCount) * LaneHeight + 8;
 
             SurfaceGrid.WidthRequest = surfaceWidth;
@@ -256,7 +269,6 @@ namespace LiveSetBuilder.App.Pages
 
         private void OnSongSelected(object? sender, SelectionChangedEventArgs e)
         {
-            // Load the selected song’s project (clips)
             if (SongListView.SelectedItem is not Song song) return;
 
             if (!_songClips.TryGetValue(song.Id, out var clips))
@@ -265,7 +277,6 @@ namespace LiveSetBuilder.App.Pages
                 _songClips[song.Id] = clips;
             }
 
-            // Set lanes to number of lanes needed by clips (or 0 if none)
             _laneCount = (clips.Count == 0) ? 0 : (clips.Max(c => c.Lane) + 1);
             RedrawRulerAndSurface();
         }
@@ -480,7 +491,7 @@ namespace LiveSetBuilder.App.Pages
                 if (_laneCount == 0) _laneCount = 1;
 
                 var lane = Math.Clamp((int)(p.Value.Y / LaneHeight), 0, Math.Max(0, _laneCount - 1));
-                var startBar = Math.Max(0, (p.Value.X) / BarPx);
+                var startBar = Math.Max(0, (p.Value.X) / _barPx);
 
                 // If dropped below existing lanes, expand lane count
                 while (lane >= _laneCount) _laneCount++;
@@ -527,9 +538,9 @@ namespace LiveSetBuilder.App.Pages
             foreach (var c in clips)
             {
                 var rect = new Rect(
-                    c.StartBar * BarPx + 6,
+                    c.StartBar * _barPx + 6,
                     c.Lane * LaneHeight + 8,
-                    Math.Max(BarPx * c.Bars - 12, 18),
+                    Math.Max(_barPx * c.Bars - 12, 18),
                     LaneHeight - 16);
 
                 var box = new BoxView
@@ -545,7 +556,6 @@ namespace LiveSetBuilder.App.Pages
                 {
                     Text = c.Label,
                     FontSize = 12,
-                    TextColor = Colors.White,
                     LineBreakMode = LineBreakMode.TailTruncation
                 };
                 AbsoluteLayout.SetLayoutBounds(label,

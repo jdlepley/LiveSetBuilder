@@ -6,11 +6,12 @@
     Title="Runner">
     <VerticalStackLayout Padding="24" Spacing="24">
         <Label Text="{Binding Show.Title}" FontSize="24" />
-        <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+        <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
             <Button Text="⏮ Prev" />
             <Button Text="⏵ Play" />
             <Button Text="⏭ Next" />
         </HorizontalStackLayout>
-        <Label Text="Bar 1 | Next cue: (stub)" FontSize="18" HorizontalOptions="Center"/>
+        <Label Text="Bar 1 | Next cue: (stub)" FontSize="18" HorizontalOptions="Center"
+               TextColor="{StaticResource TextSubtle}"/>
     </VerticalStackLayout>
 </ContentPage>

@@ -3,8 +3,7 @@
     x:Class="LiveSetBuilder.App.Pages.SetEditorPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Set Editor"
-    BackgroundColor="{AppThemeBinding Light=#151515, Dark=#0E0E0E}">
+    Title="Set Editor">
 
     <Grid RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="10">
 
@@ -12,140 +11,184 @@
         <Label Grid.Row="0"
                Text="Set Editor"
                FontSize="28"
-               FontAttributes="Bold"
-               TextColor="#FFFFFF" />
+               FontAttributes="Bold" />
 
         <!-- Show title row -->
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
-            <Label Text="{Binding Show.Title}" FontSize="20" TextColor="#FFFFFF" VerticalOptions="Center"/>
+            <Label Text="{Binding Show.Title}" FontSize="20" />
             <Button Grid.Column="1" Text="Run Set" Clicked="OnRunner"/>
         </Grid>
 
-        <!-- Main 3-column layout -->
-        <Grid Grid.Row="2" ColumnDefinitions="320,*,300" ColumnSpacing="14">
+        <!-- Zoom controls + main layout -->
+        <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="10">
 
-            <!-- LEFT: SongList -->
-            <Frame Padding="10" HasShadow="True" CornerRadius="14" BackgroundColor="#1B1B1B">
-                <Grid RowDefinitions="Auto,*">
-                    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8" VerticalOptions="Center">
-                        <Label Text="SongList" FontSize="18" TextColor="#FFFFFF" />
-                        <Grid />
-                        <Button Grid.Column="2" Text="+" WidthRequest="36" HeightRequest="36" Clicked="OnAddSong" />
+            <!-- Zoom row -->
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Label Text="Zoom" VerticalOptions="Center"/>
+                <Slider x:Name="ZoomSlider" Minimum="16" Maximum="64" ValueChanged="OnZoomChanged"
+                        MinimumTrackColor="{StaticResource Accent}" />
+                <Label Grid.Column="2" x:Name="ZoomLabel" Text="28 px/bar" VerticalOptions="Center"/>
+            </Grid>
+
+            <!-- Main 3-column layout -->
+            <Grid Grid.Row="1" ColumnDefinitions="320,*,300" ColumnSpacing="14">
+
+                <!-- LEFT: SongList -->
+                <Frame Style="{StaticResource CardFrame}">
+                    <Grid RowDefinitions="Auto,*">
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8" VerticalOptions="Center">
+                            <Label Text="SongList" FontSize="18" />
+                            <Grid />
+                            <Button Grid.Column="2" Text="+" WidthRequest="36" HeightRequest="36" Clicked="OnAddSong" />
+                        </Grid>
+
+                        <CollectionView Grid.Row="1"
+                                        x:Name="SongListView"
+                                        ItemsSource="{Binding Setlist}"
+                                        SelectionMode="Single"
+                                        SelectionChanged="OnSongSelected">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="10" Margin="0,6"
+                                          BackgroundColor="{StaticResource PanelAlt}"
+                                          ColumnDefinitions="*,Auto,Auto,Auto">
+
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup Name="CommonStates">
+                                                <VisualState Name="Normal"/>
+                                                <VisualState Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="#2E2E2E"/>
+                                                        <Setter TargetName="Title" Property="Label.TextColor" Value="{StaticResource Accent}"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+
+                                        <VerticalStackLayout>
+                                            <Label x:Name="Title" Text="{Binding Title}" FontSize="16"/>
+                                            <HorizontalStackLayout Spacing="12">
+                                                <Label Text="{Binding Bpm, StringFormat='BPM {0:0.#}'}" TextColor="{StaticResource TextSubtle}"/>
+                                                <Label Text="{Binding TimeSig}" TextColor="{StaticResource TextSubtle}"/>
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+
+                                        <!-- Up -->
+                                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Clicked="OnMoveUp">
+                                            <Button.ImageSource>
+                                                <!-- Windows uses Segoe MDL2; others fall back to text arrow -->
+                                                <OnPlatform x:TypeArguments="ImageSource">
+                                                    <On Platform="WinUI">
+                                                        <FontImageSource Glyph="&#xE70E;" FontFamily="Segoe MDL2 Assets"/>
+                                                    </On>
+                                                    <On Platform="iOS,MacCatalyst,Android,Tizen">
+                                                        <FontImageSource Glyph="▲" />
+                                                    </On>
+                                                </OnPlatform>
+                                            </Button.ImageSource>
+                                        </Button>
+
+                                        <!-- Down -->
+                                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Clicked="OnMoveDown">
+                                            <Button.ImageSource>
+                                                <OnPlatform x:TypeArguments="ImageSource">
+                                                    <On Platform="WinUI">
+                                                        <FontImageSource Glyph="&#xE70D;" FontFamily="Segoe MDL2 Assets"/>
+                                                    </On>
+                                                    <On Platform="iOS,MacCatalyst,Android,Tizen">
+                                                        <FontImageSource Glyph="▼" />
+                                                    </On>
+                                                </OnPlatform>
+                                            </Button.ImageSource>
+                                        </Button>
+
+                                        <!-- Delete -->
+                                        <Button Grid.Column="3" Style="{StaticResource IconButton}" Clicked="OnDeleteSong">
+                                            <Button.ImageSource>
+                                                <OnPlatform x:TypeArguments="ImageSource">
+                                                    <On Platform="WinUI">
+                                                        <FontImageSource Glyph="&#xE74D;" FontFamily="Segoe MDL2 Assets"/>
+                                                    </On>
+                                                    <On Platform="iOS,MacCatalyst,Android,Tizen">
+                                                        <FontImageSource Glyph="🗑" />
+                                                    </On>
+                                                </OnPlatform>
+                                            </Button.ImageSource>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </Grid>
+                </Frame>
 
-                    <CollectionView Grid.Row="1"
-                                    x:Name="SongListView"
-                                    ItemsSource="{Binding Setlist}"
-                                    SelectionMode="Single"
-                                    SelectionChanged="OnSongSelected">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="10" Margin="0,6"
-                                      BackgroundColor="#232323"
-                                      ColumnDefinitions="*,Auto,Auto,Auto">
+                <!-- CENTER: Editor -->
+                <Frame Grid.Column="1" Style="{StaticResource CardFrame}">
+                    <Grid RowDefinitions="Auto,*">
 
-                                    <!-- Use VisualStateManager here -->
-                                    <VisualStateManager.VisualStateGroups>
-                                        <VisualStateGroup Name="CommonStates">
-                                            <VisualState Name="Normal"/>
-                                            <VisualState Name="Selected">
-                                                <VisualState.Setters>
-                                                    <Setter Property="BackgroundColor" Value="#2E2E2E"/>
-                                                    <Setter TargetName="Title" Property="Label.TextColor" Value="#8AB4FF"/>
-                                                </VisualState.Setters>
-                                            </VisualState>
-                                        </VisualStateGroup>
-                                    </VisualStateManager.VisualStateGroups>
-
-                                    <VerticalStackLayout>
-                                        <Label x:Name="Title" Text="{Binding Title}" FontSize="16" TextColor="#FFFFFF"/>
-                                        <HorizontalStackLayout Spacing="12">
-                                            <Label Text="{Binding Bpm, StringFormat='BPM {0:0.#}'}" Opacity="0.7" TextColor="#FFFFFF"/>
-                                            <Label Text="{Binding TimeSig}" Opacity="0.7" TextColor="#FFFFFF"/>
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
-
-                                    <Button Grid.Column="1" Text="▲" WidthRequest="36" HeightRequest="36"
-                                            Clicked="OnMoveUp" Margin="6,0" />
-                                    <Button Grid.Column="2" Text="▼" WidthRequest="36" HeightRequest="36"
-                                            Clicked="OnMoveDown" Margin="6,0" />
-                                    <Button Grid.Column="3" Text="🗑" WidthRequest="36" HeightRequest="36"
-                                            Clicked="OnDeleteSong" Margin="6,0" />
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Grid>
-            </Frame>
-
-            <!-- CENTER: Editor -->
-            <Frame Grid.Column="1" Padding="10" HasShadow="True" CornerRadius="14" BackgroundColor="#1B1B1B">
-                <Grid RowDefinitions="Auto,*">
-
-                    <!-- Ruler: bars & subdivisions -->
-                    <ScrollView x:Name="RulerScroll" Grid.Row="0" Orientation="Horizontal" Scrolled="OnRulerScrolled">
-                        <Grid x:Name="RulerGrid" HeightRequest="28" BackgroundColor="#222" />
-                    </ScrollView>
-
-                    <!-- Timeline: lanes & clips (both scrolls, synced horizontally with Ruler) -->
-                    <Grid Grid.Row="1" ColumnDefinitions="48,*" RowDefinitions="*">
-                        <!-- Lane labels column -->
-                        <ScrollView x:Name="LaneScroll" Orientation="Vertical" Grid.Column="0">
-                            <VerticalStackLayout x:Name="LaneLabels" Spacing="4" />
+                        <!-- Ruler: bars & subdivisions -->
+                        <ScrollView x:Name="RulerScroll" Grid.Row="0" Orientation="Horizontal" Scrolled="OnRulerScrolled">
+                            <Grid x:Name="RulerGrid" HeightRequest="28" BackgroundColor="#222" />
                         </ScrollView>
 
-                        <!-- Editor surface -->
-                        <ScrollView x:Name="EditorHScroll" Grid.Column="1" Orientation="Horizontal" Scrolled="OnEditorHScrolled">
-                            <ScrollView x:Name="EditorVScroll" Orientation="Vertical">
-                                <Grid x:Name="EditorGrid">
-                                    <!-- background stripes live in this grid -->
-                                    <Grid x:Name="SurfaceGrid" />
-
-                                    <!-- Drop target & clips overlay -->
-                                    <AbsoluteLayout x:Name="ClipCanvas">
-                                        <AbsoluteLayout.GestureRecognizers>
-                                            <DropGestureRecognizer AllowDrop="True" Drop="OnEditorDrop"/>
-                                        </AbsoluteLayout.GestureRecognizers>
-                                    </AbsoluteLayout>
-                                </Grid>
+                        <!-- Timeline: lanes & clips (both scrolls, synced horizontally with Ruler) -->
+                        <Grid Grid.Row="1" ColumnDefinitions="48,*" RowDefinitions="*">
+                            <!-- Lane labels column -->
+                            <ScrollView x:Name="LaneScroll" Orientation="Vertical" Grid.Column="0">
+                                <VerticalStackLayout x:Name="LaneLabels" Spacing="4" />
                             </ScrollView>
-                        </ScrollView>
-                    </Grid>
-                </Grid>
-            </Frame>
 
-            <!-- RIGHT: SoundBank -->
-            <Frame Grid.Column="2" Padding="10" HasShadow="True" CornerRadius="14" BackgroundColor="#1B1B1B">
-                <Grid RowDefinitions="Auto,*">
-                    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8" VerticalOptions="Center">
-                        <Label Text="SoundBank" FontSize="18" TextColor="#FFFFFF"/>
-                        <Grid />
-                        <Button Grid.Column="2" Text="+" WidthRequest="36" HeightRequest="36" Clicked="OnAddBankItem"/>
-                    </Grid>
+                            <!-- Editor surface -->
+                            <ScrollView x:Name="EditorHScroll" Grid.Column="1" Orientation="Horizontal" Scrolled="OnEditorHScrolled">
+                                <ScrollView x:Name="EditorVScroll" Orientation="Vertical">
+                                    <Grid x:Name="EditorGrid">
+                                        <!-- background stripes live in this grid -->
+                                        <Grid x:Name="SurfaceGrid" />
 
-                    <CollectionView Grid.Row="1"
-                                    x:Name="SoundBankView"
-                                    ItemsSource="{Binding SoundBank}"
-                                    SelectionMode="None">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Padding="10" Margin="0,6" BackgroundColor="#232323" ColumnDefinitions="*,Auto">
-                                    <Grid.GestureRecognizers>
-                                        <DragGestureRecognizer DragStarting="OnBankItemDragStarting"/>
-                                    </Grid.GestureRecognizers>
-                                    <VerticalStackLayout>
-                                        <Label Text="{Binding Name}" FontSize="16" TextColor="#FFFFFF"/>
-                                        <Label Text="{Binding Kind}" FontSize="12" TextColor="#BBBBBB"/>
-                                    </VerticalStackLayout>
-                                    <Label Grid.Column="1" Text="↔︎" TextColor="#999" VerticalTextAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Grid>
-            </Frame>
+                                        <!-- Drop target & clips overlay -->
+                                        <AbsoluteLayout x:Name="ClipCanvas">
+                                            <AbsoluteLayout.GestureRecognizers>
+                                                <DropGestureRecognizer AllowDrop="True" Drop="OnEditorDrop"/>
+                                            </AbsoluteLayout.GestureRecognizers>
+                                        </AbsoluteLayout>
+                                    </Grid>
+                                </ScrollView>
+                            </ScrollView>
+                        </Grid>
+                    </Grid>
+                </Frame>
+
+                <!-- RIGHT: SoundBank -->
+                <Frame Grid.Column="2" Style="{StaticResource CardFrame}">
+                    <Grid RowDefinitions="Auto,*">
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,8" VerticalOptions="Center">
+                            <Label Text="SoundBank" FontSize="18"/>
+                            <Grid />
+                            <Button Grid.Column="2" Text="+" WidthRequest="36" HeightRequest="36" Clicked="OnAddBankItem"/>
+                        </Grid>
+
+                        <CollectionView Grid.Row="1"
+                                        x:Name="SoundBankView"
+                                        ItemsSource="{Binding SoundBank}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="10" Margin="0,6" BackgroundColor="{StaticResource PanelAlt}" ColumnDefinitions="*,Auto">
+                                        <Grid.GestureRecognizers>
+                                            <DragGestureRecognizer DragStarting="OnBankItemDragStarting"/>
+                                        </Grid.GestureRecognizers>
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding Name}" FontSize="16"/>
+                                            <Label Text="{Binding Kind}" FontSize="12" TextColor="{StaticResource TextSubtle}"/>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1" Text="↔︎" TextColor="{StaticResource TextSubtle}" VerticalTextAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Grid>
+                </Frame>
+            </Grid>
         </Grid>
-
-        <!-- (optional) analysis overlay you already have -->
     </Grid>
 </ContentPage>
